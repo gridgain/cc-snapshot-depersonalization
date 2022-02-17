@@ -32,6 +32,11 @@
             <artifactId>gridgain-core</artifactId>
             <version>${gridgain.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.gridgain</groupId>
+            <artifactId>gridgain-ultimate</artifactId>
+            <version>${gridgain.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -44,6 +49,12 @@
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>org.gridgain.cc.snapshot.depersonalization.SnapshotDepersonalization</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
                 <executions>
                     <execution>

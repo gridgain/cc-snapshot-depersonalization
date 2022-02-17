@@ -27,6 +27,7 @@ import org.gridgain.grid.persistentstore.SnapshotInfo;
 import org.gridgain.grid.persistentstore.SnapshotPath;
 
 import static java.util.Collections.singleton;
+import static org.apache.ignite.cluster.ClusterState.ACTIVE;
 
 public class SnapshotDepersonalization {
     private static final String DEPERSONALIZATION_OUTPUT_DIR = "DEPERSONALIZATION_OUTPUT_DIRECTORY";
@@ -60,7 +61,7 @@ public class SnapshotDepersonalization {
 
     private static final Random RND = new Random();
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         IgniteConfiguration cfg = new IgniteConfiguration()
             .setDataStorageConfiguration(new DataStorageConfiguration()
                 .setDefaultDataRegionConfiguration(new DataRegionConfiguration()
@@ -72,6 +73,8 @@ public class SnapshotDepersonalization {
         System.out.println("Depersonalization started");
 
         try (IgniteEx ignite = (IgniteEx)Ignition.start(cfg)) {
+            ignite.cluster().state(ACTIVE);
+
             GridGain gg = ignite.plugin(GridGain.PLUGIN_NAME);
             GridSnapshotEx snapshot = (GridSnapshotEx)gg.snapshot();
 
@@ -90,7 +93,9 @@ public class SnapshotDepersonalization {
         System.out.println("Loading an existing snapshot...");
 
         String dir = IgniteSystemProperties.getString(DEPERSONALIZATION_INPUT_DIR);
-        assert dir != null : "Not defined input directory. Use a system property " + DEPERSONALIZATION_INPUT_DIR;
+
+        if (dir == null)
+            throw new IllegalArgumentException("Not defined input directory. Use a system property " + DEPERSONALIZATION_INPUT_DIR);
 
         SnapshotPath path = SnapshotPath.file().path(new File(dir)).build();
 
@@ -103,7 +108,11 @@ public class SnapshotDepersonalization {
         System.out.println("Restoring from snapshot [id=" + snap.snapshotId() + "]...");
 
         snapshot
-            .restore(new RestoreSnapshotParams().snapshotId(snap.snapshotId()).forceRestore(true))
+            .restore(new RestoreSnapshotParams()
+                .snapshotId(snap.snapshotId())
+                .forceRestore(true)
+                .optionalSearchPaths(singleton(path))
+            )
             .get();
 
         System.out.println("Restored successfully.");
@@ -218,7 +227,9 @@ public class SnapshotDepersonalization {
 
     private static String[] readPropertyStrings(String propName) {
         String s = IgniteSystemProperties.getString(propName);
-        assert s != null : "Not defined property: " + propName;
+
+        if (s == null)
+            throw new IllegalArgumentException("Not defined property: " + propName);
 
         return s.split(",");
     }
@@ -227,7 +238,9 @@ public class SnapshotDepersonalization {
         System.out.println("Creating a new snapshot...");
 
         String dir = IgniteSystemProperties.getString(DEPERSONALIZATION_OUTPUT_DIR);
-        assert dir != null : "Not defined output directory. Use a system property " + DEPERSONALIZATION_OUTPUT_DIR;
+
+        if (dir == null)
+            throw new IllegalArgumentException("Not defined output directory. Use a system property " + DEPERSONALIZATION_OUTPUT_DIR);
 
         snapshot.createFullSnapshot(
             null,
