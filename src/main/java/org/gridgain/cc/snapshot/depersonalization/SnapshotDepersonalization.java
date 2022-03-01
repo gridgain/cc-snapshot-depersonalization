@@ -2,6 +2,7 @@ package org.gridgain.cc.snapshot.depersonalization;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Random;
@@ -16,6 +17,8 @@ import org.apache.ignite.configuration.DataRegionConfiguration;
 import org.apache.ignite.configuration.DataStorageConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.internal.IgniteEx;
+import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
+import org.apache.ignite.spi.discovery.tcp.ipfinder.multicast.TcpDiscoveryMulticastIpFinder;
 import org.gridgain.grid.GridGain;
 import org.gridgain.grid.configuration.GridGainConfiguration;
 import org.gridgain.grid.configuration.SnapshotConfiguration;
@@ -66,6 +69,9 @@ public class SnapshotDepersonalization {
             .setDataStorageConfiguration(new DataStorageConfiguration()
                 .setDefaultDataRegionConfiguration(new DataRegionConfiguration()
                     .setPersistenceEnabled(true)))
+            .setDiscoverySpi(new TcpDiscoverySpi()
+                .setIpFinder(new TcpDiscoveryMulticastIpFinder()
+                    .setAddresses(Collections.singleton("unknownhost:49999"))))
             .setPluginConfigurations(new GridGainConfiguration()
                 .setSnapshotConfiguration(new SnapshotConfiguration()
                     .setSnapshotsPath("/tmp")));
