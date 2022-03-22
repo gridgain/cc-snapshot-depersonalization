@@ -70,8 +70,9 @@ public class SnapshotDepersonalization {
                 .setDefaultDataRegionConfiguration(new DataRegionConfiguration()
                     .setPersistenceEnabled(true)))
             .setDiscoverySpi(new TcpDiscoverySpi()
+                .setLocalPort(48888)
                 .setIpFinder(new TcpDiscoveryMulticastIpFinder()
-                    .setAddresses(Collections.singleton("unknownhost:49999"))))
+                    .setAddresses(Collections.singleton("localhost:48888"))))
             .setPluginConfigurations(new GridGainConfiguration()
                 .setSnapshotConfiguration(new SnapshotConfiguration()
                     .setSnapshotsPath("/tmp")));
